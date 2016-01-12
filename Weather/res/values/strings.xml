@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">天气预报</string>
+    <!-- Just use standard Pull Down String when pulling up. These can be set for languages which require it -->
+
+    <string name="pull_to_refresh_pull_label">下拉刷新…</string>
+    <string name="pull_to_refresh_release_label">放开以刷新…</string>
+    <string name="pull_to_refresh_refreshing_label">正在载入…</string>
+    <string name="pull_to_refresh_from_bottom_pull_label">@string/pull_to_refresh_pull_label</string>
+    <string name="pull_to_refresh_from_bottom_release_label">@string/pull_to_refresh_release_label</string>
+    <string name="pull_to_refresh_from_bottom_refreshing_label">@string/pull_to_refresh_refreshing_label</string>
+    
+    <string name="test_city">北京</string>
+    <string name="forecast">预报</string>
+    <string name="today">今天</string>
+    
+    <!--详细信息  -->
+    <string name="felt_air_temp">体感温度</string>
+    <string name="humidity">湿度</string>
+    <string name="wind">风向风力</string>
+    <string name="uv_index">紫外线指数</string>
+    <string name="dressing_index">穿衣指数</string>
+    <string name="details">详细信息</string>
+    <string name="pm">PM2.5</string>
+    <string name="default_text">_ _</string>
+    <string name="title_city">城市选择</string>
+
+</resources>
