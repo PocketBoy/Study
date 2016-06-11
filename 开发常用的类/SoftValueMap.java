@@ -1,11 +1,11 @@
-package cn.ithm.fragmentdemohm23.util;
+ï»¿package cn.ithm.fragmentdemohm23.util;
 
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
 /**
- * ½µµÍ¶ÔÏóµÄÒıÓÃ¼¶±ğµ½ÈíÒıÓÃ
+ * é™ä½å¯¹è±¡çš„å¼•ç”¨çº§åˆ«åˆ°è½¯å¼•ç”¨
  * 
  * @author Administrator
  * 
@@ -13,18 +13,18 @@ import java.util.HashMap;
  * @param <V>
  */
 public class SoftValueMap<K, V> extends HashMap<K, V> {
-	// ½µµÍVµÄÒıÓÃ¼¶±ğµ½ÈíÒıÓÃ
+	// é™ä½Vçš„å¼•ç”¨çº§åˆ«åˆ°è½¯å¼•ç”¨
 	private HashMap<K, SoftValue<K, V>> temp;
 
-	private ReferenceQueue<V> queue;// ×°ÆÆ´ü×Ó£¨·ÅÖÃÊÖ»úV£©
+	private ReferenceQueue<V> queue;// è£…ç ´è¢‹å­ï¼ˆæ”¾ç½®æ‰‹æœºVï¼‰
 
 	public SoftValueMap() {
-		// ÈíÒıÓÃ
-		// Object v=new Object();//Õ¼ÓÃÄÚ´æ¶à
-		// SoftReference sr=new SoftReference(v);// ½µµÍÁËvµÄÒıÓÃ½ç±ğ
+		// è½¯å¼•ç”¨
+		// Object v=new Object();//å ç”¨å†…å­˜å¤š
+		// SoftReference sr=new SoftReference(v);// é™ä½äº†vçš„å¼•ç”¨ç•Œåˆ«
 
-		// ¢Ù½«ÊÖ»ú£¨Õ¼ÓÃÄÚ´æ½Ï¶àµÄ¶ÔÏó£©Ìí¼Óµ½´ü×Ó£¨SoftReference£©ÀïÃæ
-		// ¢ÚÒ»µ©ÊÖ»ú±»ÍµÁË£¬½«ÆÆ´ü×Ó»ØÊÕ
+		// â‘ å°†æ‰‹æœºï¼ˆå ç”¨å†…å­˜è¾ƒå¤šçš„å¯¹è±¡ï¼‰æ·»åŠ åˆ°è¢‹å­ï¼ˆSoftReferenceï¼‰é‡Œé¢
+		// â‘¡ä¸€æ—¦æ‰‹æœºè¢«å·äº†ï¼Œå°†ç ´è¢‹å­å›æ”¶
 
 		temp = new HashMap<K, SoftValue<K, V>>();
 		queue = new ReferenceQueue<V>();
@@ -33,8 +33,8 @@ public class SoftValueMap<K, V> extends HashMap<K, V> {
 	@Override
 	public V put(K key, V value) {
 		// SoftValue<K,V> sr = new SoftValue<K,V>(value);
-		// µ±GCÔÚ»ØÊÕÊÖ»úÊ±ºò£¬»á½«srÌí¼Óµ½queue
-		SoftValue<K, V> sr = new SoftValue<K, V>(value, key, queue);// ½«srÓëqueue°ó¶¨
+		// å½“GCåœ¨å›æ”¶æ‰‹æœºæ—¶å€™ï¼Œä¼šå°†sræ·»åŠ åˆ°queue
+		SoftValue<K, V> sr = new SoftValue<K, V>(value, key, queue);// å°†srä¸queueç»‘å®š
 		temp.put(key, sr);
 		return null;
 	}
@@ -44,7 +44,7 @@ public class SoftValueMap<K, V> extends HashMap<K, V> {
 		clearSR();
 		SoftValue<K, V> sr = temp.get(key);
 		if (sr != null) {
-			// Èç¹û´ËÒıÓÃ¶ÔÏóÒÑ¾­ÓÉ³ÌĞò»òÀ¬»ø»ØÊÕÆ÷Çå³ı£¬Ôò´Ë·½·¨½«·µ»Ø null¡£
+			// å¦‚æœæ­¤å¼•ç”¨å¯¹è±¡å·²ç»ç”±ç¨‹åºæˆ–åƒåœ¾å›æ”¶å™¨æ¸…é™¤ï¼Œåˆ™æ­¤æ–¹æ³•å°†è¿”å› nullã€‚
 			return sr.get();
 		} else {
 			return null;
@@ -54,8 +54,8 @@ public class SoftValueMap<K, V> extends HashMap<K, V> {
 	@Override
 	public boolean containsKey(Object key) {
 		clearSR();
-		// Ê²Ã´²Å½Ğº¬ÓĞ
-		// »ñÈ¡µ½´ü×Ó£¬´Ó´ü×ÓÀïÃæÄÃµ½ÊÖ»úÁË£¬º¬ÓĞ
+		// ä»€ä¹ˆæ‰å«å«æœ‰
+		// è·å–åˆ°è¢‹å­ï¼Œä»è¢‹å­é‡Œé¢æ‹¿åˆ°æ‰‹æœºäº†ï¼Œå«æœ‰
 		SoftValue<K, V> sr = temp.get(key);
 		// temp.containsKey(key);
 
@@ -70,19 +70,19 @@ public class SoftValueMap<K, V> extends HashMap<K, V> {
 	}
 
 	/**
-	 * ÇåÀí±»»ØÊÕµôÊÖ»úµÄÆÆ´ü×Ó
+	 * æ¸…ç†è¢«å›æ”¶æ‰æ‰‹æœºçš„ç ´è¢‹å­
 	 */
 	private void clearSR() {
-		// ·½°¸Ò»£ºÑ­»·Ò»ÏÂtemp£¬Èç¹û±»»ØÊÕµôÁË£¬ÇåÀí³ö£ô£å£í£ğ
-		// ÄÚ´æÈç¹ûÄÚ´æ»¹ÄÜ¹»Âú×ã£ºtemp²»»áÓĞÔªËØ±»»ØÊÕ
+		// æ–¹æ¡ˆä¸€ï¼šå¾ªç¯ä¸€ä¸‹tempï¼Œå¦‚æœè¢«å›æ”¶æ‰äº†ï¼Œæ¸…ç†å‡ºï½”ï½…ï½ï½
+		// å†…å­˜å¦‚æœå†…å­˜è¿˜èƒ½å¤Ÿæ»¡è¶³ï¼štempä¸ä¼šæœ‰å…ƒç´ è¢«å›æ”¶
 
-		// ·½°¸¶ş£ºÈç¹ûGC°ÑÊÖ»ú»ØÊÕ£¬½«ÆÆ´ü×ÓµÄÒıÓÃ¼ÇÂ¼µ½Ò»¸ö£¨×Ô¼º´´½¨£©¼¯ºÏÖĞ
-		// £¨×Ô¼º´´½¨£©¼¯ºÏ
+		// æ–¹æ¡ˆäºŒï¼šå¦‚æœGCæŠŠæ‰‹æœºå›æ”¶ï¼Œå°†ç ´è¢‹å­çš„å¼•ç”¨è®°å½•åˆ°ä¸€ä¸ªï¼ˆè‡ªå·±åˆ›å»ºï¼‰é›†åˆä¸­
+		// ï¼ˆè‡ªå·±åˆ›å»ºï¼‰é›†åˆ
 
-		// Èç¹û´æÔÚÒ»¸öÁ¢¼´¿ÉÓÃµÄ¶ÔÏó£¬Ôò´Ó¸Ã¶ÓÁĞÖĞ"ÒÆ³ı"´Ë¶ÔÏó²¢·µ»Ø¡£·ñÔò´Ë·½·¨Á¢¼´·µ»Ø null¡£
+		// å¦‚æœå­˜åœ¨ä¸€ä¸ªç«‹å³å¯ç”¨çš„å¯¹è±¡ï¼Œåˆ™ä»è¯¥é˜Ÿåˆ—ä¸­"ç§»é™¤"æ­¤å¯¹è±¡å¹¶è¿”å›ã€‚å¦åˆ™æ­¤æ–¹æ³•ç«‹å³è¿”å› nullã€‚
 		SoftValue<K, V> poll = (SoftValue<K, V>) queue.poll();
 		while (poll != null) {
-			// ´Ótemp½«srÇ¿ÒıÓÃ¶ÔÏóÇå³ı
+			// ä»tempå°†srå¼ºå¼•ç”¨å¯¹è±¡æ¸…é™¤
 			temp.remove(poll.key);
 			poll = (SoftValue<K, V>) queue.poll();
 		}
@@ -94,7 +94,7 @@ public class SoftValueMap<K, V> extends HashMap<K, V> {
 	}
 
 	/**
-	 * ¼ÓÇ¿°æµÄ´ü×Ó£¬´æ´¢ÁËÒ»ÏÂkeyĞÅÏ¢
+	 * åŠ å¼ºç‰ˆçš„è¢‹å­ï¼Œå­˜å‚¨äº†ä¸€ä¸‹keyä¿¡æ¯
 	 * 
 	 * @author Administrator
 	 * 
