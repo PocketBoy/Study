@@ -1,6 +1,4 @@
-﻿package cn.ithm.fragmentdemohm23.util;
-
-import java.lang.ref.ReferenceQueue;
+﻿import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 
