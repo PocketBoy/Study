@@ -1,0 +1,11 @@
+# hebao
+Just do it !
+这里的是网络图片加载器
+(1)它对网络原始图片进行了缩放，并且使用了LruCache来进行内存缓存，使用SD卡作为磁盘缓存.
+加载图片路径过程：内存缓存(LruCache)---> 磁盘缓存(SD卡)---> 网络
+这样就大大提高加载图片的效率，同时很大程度上减少了OOM的异常。
+
+(2)同时实现了一个点击图片实现全屏显示的功能
+其实就是Activity的跳转，在新的布局中全屏显示点击的图片
+当然跳转的过程中，原来的Activity要将点击的Item图片传递给跳转之后的Activity.
+这里参考博客：http://blog.csdn.net/lonelyroamer/article/details/25497737
