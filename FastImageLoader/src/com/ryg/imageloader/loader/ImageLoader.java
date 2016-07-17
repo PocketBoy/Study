@@ -68,8 +68,7 @@ public class ImageLoader {
     };
 
     /**
-     * 线程池
-     * 
+     * 线程池 
      */
     public static final Executor THREAD_POOL_EXECUTOR = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAXIMUM_POOL_SIZE,
@@ -99,14 +98,17 @@ public class ImageLoader {
 
     private ImageLoader(Context context) {
         mContext = context.getApplicationContext();
+        
         int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         int cacheSize = maxMemory / 8;
         mMemoryCache = new LruCache<String, Bitmap>(cacheSize) {
+        	/***测量每一个Bitmap大小**/
             @Override
             protected int sizeOf(String key, Bitmap bitmap) {
                 return bitmap.getRowBytes() * bitmap.getHeight() / 1024;
             }
         };
+        
         File diskCacheDir = getDiskCacheDir(mContext, "bitmap");
         if (!diskCacheDir.exists()) {
             diskCacheDir.mkdirs();
@@ -131,18 +133,28 @@ public class ImageLoader {
         return new ImageLoader(context);
     }
 
+    /**
+     * LruCache内存缓存的添加
+     * @param key
+     * @param bitmap
+     */
     private void addBitmapToMemoryCache(String key, Bitmap bitmap) {
         if (getBitmapFromMemCache(key) == null) {
             mMemoryCache.put(key, bitmap);
         }
     }
-
+    
+    /**
+     * LruCache内存缓存的读取
+     * @param key
+     * @return
+     */
     private Bitmap getBitmapFromMemCache(String key) {
         return mMemoryCache.get(key);
     }
 
     /**
-     * 异步加载
+     *  异步加载
      * load bitmap from memory cache or disk cache or network async, then bind imageView and bitmap.
      * NOTE THAT: should run in UI Thread
      * @param uri http url
@@ -155,19 +167,23 @@ public class ImageLoader {
     public void bindBitmap(final String uri, final ImageView imageView,
             final int reqWidth, final int reqHeight) {
         imageView.setTag(TAG_KEY_URI, uri);
+        //先从内存缓存中取图片
         Bitmap bitmap = loadBitmapFromMemCache(uri);
         if (bitmap != null) {
             imageView.setImageBitmap(bitmap);
             return;
         }
 
+        //内存缓存中没有，就开启在线程池中调用同步加载方法
         Runnable loadBitmapTask = new Runnable() {
 
             @Override
             public void run() {
                 Bitmap bitmap = loadBitmap(uri, reqWidth, reqHeight);
                 if (bitmap != null) {
+                	//将Bitmap、图片地址以及需要绑定的ImageView封装成一个LoaderResult对象
                     LoaderResult result = new LoaderResult(imageView, uri, bitmap);
+                    //再通过mMainHandler向主线程发送一个消息，这样imageView可以设置图片
                     mMainHandler.obtainMessage(MESSAGE_POST_RESULT, result).sendToTarget();
                 }
             }
@@ -176,7 +192,7 @@ public class ImageLoader {
     }
 
     /**
-     * 同步加载
+     *  同步加载
      * load bitmap from memory cache or disk cache or network.
      * @param uri http url
      * @param reqWidth the width ImageView desired
@@ -184,6 +200,7 @@ public class ImageLoader {
      * @return bitmap, maybe null.
      */
     public Bitmap loadBitmap(String uri, int reqWidth, int reqHeight) {
+    	//先从内存缓存中取图片
         Bitmap bitmap = loadBitmapFromMemCache(uri);
         if (bitmap != null) {
             Log.d(TAG, "loadBitmapFromMemCache,url:" + uri);
@@ -191,17 +208,22 @@ public class ImageLoader {
         }
 
         try {
+        	//然后从存储缓存中取图片
             bitmap = loadBitmapFromDiskCache(uri, reqWidth, reqHeight);
             if (bitmap != null) {
                 Log.d(TAG, "loadBitmapFromDisk,url:" + uri);
                 return bitmap;
             }
+            
+            //从网络中取图片
             bitmap = loadBitmapFromHttp(uri, reqWidth, reqHeight);
             Log.d(TAG, "loadBitmapFromHttp,url:" + uri);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+        //提供程序容错性，倘若内存缓存中没有图片，没有创建存储缓存（自然也没有想要的图片），去网络取图片
+        //此时在网络上取图片，就不能加载到存储内存再使用了，只能直接从网络流中获取
         if (bitmap == null && !mIsDiskLruCacheCreated) {
             Log.w(TAG, "encounter error, DiskLruCache is not created.");
             bitmap = downloadBitmapFromUrl(uri);
@@ -210,37 +232,20 @@ public class ImageLoader {
         return bitmap;
     }
 
+    /**
+     * 从内存缓存中取图片
+     * @param url
+     * @return
+     */
     private Bitmap loadBitmapFromMemCache(String url) {
         final String key = hashKeyFormUrl(url);
         Bitmap bitmap = getBitmapFromMemCache(key);
         return bitmap;
     }
 
-    private Bitmap loadBitmapFromHttp(String url, int reqWidth, int reqHeight)
-            throws IOException {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            throw new RuntimeException("can not visit network from UI Thread.");
-        }
-        if (mDiskLruCache == null) {
-            return null;
-        }
-        
-        String key = hashKeyFormUrl(url);
-        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
-        if (editor != null) {
-            OutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);
-            if (downloadUrlToStream(url, outputStream)) {
-                editor.commit();
-            } else {
-                editor.abort();
-            }
-            mDiskLruCache.flush();
-        }
-        return loadBitmapFromDiskCache(url, reqWidth, reqHeight);
-    }
 
     /**
-     * 从存储缓存中取图片数据
+     * 从存储缓存中取图片
      * @param url
      * @param reqWidth
      * @param reqHeight
@@ -275,7 +280,40 @@ public class ImageLoader {
 
         return bitmap;
     }
+    
+    /**
+     * 从网络中取图片
+     * 加载完成图片，把图片缓存到存储内存DiskCache中，然后从存储内存中取出使用
+     * @param url
+     * @param reqWidth
+     * @param reqHeight
+     * @return
+     * @throws IOException
+     */
+    private Bitmap loadBitmapFromHttp(String url, int reqWidth, int reqHeight)
+            throws IOException {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            throw new RuntimeException("can not visit network from UI Thread.");
+        }
+        if (mDiskLruCache == null) {
+            return null;
+        }
+        
+        String key = hashKeyFormUrl(url);
+        DiskLruCache.Editor editor = mDiskLruCache.edit(key);
+        if (editor != null) {
+            OutputStream outputStream = editor.newOutputStream(DISK_CACHE_INDEX);
+            if (downloadUrlToStream(url, outputStream)) {
+                editor.commit();
+            } else {
+                editor.abort();
+            }
+            mDiskLruCache.flush();
+        }
+        return loadBitmapFromDiskCache(url, reqWidth, reqHeight);
+    }
 
+    
     public boolean downloadUrlToStream(String urlString,
             OutputStream outputStream) {
         HttpURLConnection urlConnection = null;
@@ -363,7 +401,7 @@ public class ImageLoader {
     }
 
     /**
-     * 获取到缓存地址的路径
+     * 获取到缓存地址的路径（LruCache or DiskLruCache）
      * @param context
      * @param uniqueName
      * @return

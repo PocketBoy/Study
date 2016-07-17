@@ -8,7 +8,6 @@ import com.ryg.imageloader.ui.SmoothImageView;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 public class SpaceImageDetailActivity extends Activity {
@@ -17,7 +16,7 @@ public class SpaceImageDetailActivity extends Activity {
 	private int mPosition;
 	private int mLocationX;
 	private int mLocationY;
-	private int mWidth;
+	private int mWidth;	
 	private int mHeight;
 	
 	SmoothImageView imageview = null;
